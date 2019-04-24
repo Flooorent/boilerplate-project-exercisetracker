@@ -19,6 +19,18 @@ describe('app', function() {
         done()
     })
 
+    beforeEach(function(done) {
+        mongoClient.db(dbName).createCollection(mongoCollection, function(err) {
+            if(err) {
+                console.log(`Couldn't create collection ${mongoCollection}`)
+                throw new Error(err)
+            }
+
+            console.log(`Created test collection ${mongoCollection}`)
+            done()
+        })
+    })
+
     afterEach(function(done) {
         mongoClient.db(dbName).dropCollection(mongoCollection, function(err) {
             if(err) {
@@ -356,38 +368,43 @@ describe('app', function() {
 
         const firstUserFullLogCount = firstUserFullLog.length
 
+        // TODO: refacto all beforeEach
+        beforeEach(function(done) {
+            chai.request(app)
+                .post('/api/exercise/new-user')
+                .send({ username: firstUsername })
+                .end(function(err, res) {
+                    if(err) {
+                        throw new Error(err)
+                    }
+
+                    firstUserId = res.body._id
+                    done()
+                })
+        })
+
+        beforeEach(function(done) {
+            chai.request(app)
+                .post('/api/exercise/new-user')
+                .send({ username: secondUsername })
+                .end(function(err, res) {
+                    if(err) {
+                        throw new Error(err)
+                    }
+
+                    secondUserId = res.body._id
+                    done()
+                })
+        })
+
         beforeEach(function(done) {
             Promise.all([
-                chai.request(app)
-                    .post('/api/exercise/new-user')
-                    .send({ username: firstUsername })
-                    .end(function(err, res) {
-                        if(err) {
-                            throw new Error(err)
-                        }
-
-                        firstUserId = res.body._id
-                    }),
-                chai.request(app)
-                    .post('/api/exercise/new-user')
-                    .send({ username: secondUsername })
-                    .end(function(err, res) {
-                        if(err) {
-                            throw new Error(err)
-                        }
-
-                        secondUserId = res.body._id
-                    }),
+                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[0] }),
+                chai.request(app).post('/api/exercise/add').send({ userid: secondUserId, description: 'ex11', duration: 30, date: '2019-04-11' }),
+                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[1] }),
+                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[2] }),
             ])
-            .then(() => {
-                Promise.all([
-                    chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[0] }),
-                    chai.request(app).post('/api/exercise/add').send({ userid: secondUserId, description: 'ex11', duration: 30, date: '2019-04-11' }),
-                    chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[1] }),
-                    chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[2] }),
-                ])
-                .then(() => done())
-            })
+            .then(() => done())
         })
 
         it('should return the user object with the log and count', function(done) {
