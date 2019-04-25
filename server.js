@@ -1,5 +1,5 @@
 const {client: mongoClient} = require('./config/mongo')
-const app = require('./app')
+const app = require('./src/app')
 
 mongoClient.connect(function(err) {
   if(err) {

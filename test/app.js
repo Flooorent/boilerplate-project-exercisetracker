@@ -2,8 +2,9 @@ const chai = require('chai')
 const chaiHttp = require('chai-http')
 const httpStatus = require('http-status')
 
-const app = require('../app')
-const {client: mongoClient, dbName, collection: mongoCollection} = require('../config/mongo')
+const app = require('../src/app')
+// TODO: use correct collection : usersCollection and logsCollection
+const {client: mongoClient, dbName, usersCollection, logsCollection } = require('../config/mongo')
 
 chai.use(chaiHttp).should()
 
@@ -19,29 +20,53 @@ describe('app', function() {
         done()
     })
 
+    // TODO: refacto all beforeEach and afterEach
     beforeEach(function(done) {
-        mongoClient.db(dbName).createCollection(mongoCollection, function(err) {
+        mongoClient.db(dbName).createCollection(usersCollection, function(err) {
             if(err) {
-                console.log(`Couldn't create collection ${mongoCollection}`)
+                console.log(`Couldn't create collection ${usersCollection}`)
                 throw new Error(err)
             }
 
-            console.log(`Created test collection ${mongoCollection}`)
+            console.log(`Created test collection ${usersCollection}`)
+            done()
+        })
+    })
+
+    beforeEach(function(done) {
+        mongoClient.db(dbName).createCollection(logsCollection, function(err) {
+            if(err) {
+                console.log(`Couldn't create collection ${logsCollection}`)
+                throw new Error(err)
+            }
+
+            console.log(`Created test collection ${logsCollection}`)
             done()
         })
     })
 
     afterEach(function(done) {
-        mongoClient.db(dbName).dropCollection(mongoCollection, function(err) {
+        mongoClient.db(dbName).dropCollection(usersCollection, function(err) {
             if(err) {
-                console.log(`Couldn't drop test collection ${mongoCollection}`)
+                console.log(`Couldn't drop test collection ${usersCollection}`)
                 throw new Error(err)
             }
 
-            console.log(`Dropped test collection ${mongoCollection}`)
+            console.log(`Dropped test collection ${usersCollection}`)
             done()
         })
+    })
 
+    afterEach(function(done) {
+        mongoClient.db(dbName).dropCollection(logsCollection, function(err) {
+            if(err) {
+                console.log(`Couldn't drop test collection ${logsCollection}`)
+                throw new Error(err)
+            }
+
+            console.log(`Dropped test collection ${logsCollection}`)
+            done()
+        })
     })
 
     after(function(done) {
