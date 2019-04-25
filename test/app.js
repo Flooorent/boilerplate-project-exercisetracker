@@ -179,11 +179,12 @@ describe('app', function() {
 
                     const { _id: id1, username: username1 } = res.body[0]
                     const { _id: id2, username: username2 } = res.body[1]
+                    const usernames = [username1, username2]
 
                     id1.should.not.equal(id2)
                     username1.should.not.equal(username2)
-                    [username1, username2].should.include(firstUsername)
-                    [username1, username2].should.include(secondUsername)
+                    usernames.should.include(firstUsername)
+                    usernames.should.include(secondUsername)
 
                     done()
                 })

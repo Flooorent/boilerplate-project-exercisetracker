@@ -5,7 +5,6 @@ const { userSchema } = require('./schemas')
 const { client: mongoClient, dbName, usersCollection } = require('../config/mongo')
 
 
-// For debug only
 function getAllUsers(req, res, next) {
     const collection = mongoClient.db(dbName).collection(usersCollection)
 
@@ -14,7 +13,6 @@ function getAllUsers(req, res, next) {
             return next(err)
         }
 
-        console.log(result)
         res.status(httpStatus.OK).json(result)
     })
 }
