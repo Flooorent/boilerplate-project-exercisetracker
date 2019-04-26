@@ -3,8 +3,8 @@ const chaiHttp = require('chai-http')
 const httpStatus = require('http-status')
 
 const app = require('../src/app')
-// TODO: use correct collection : usersCollection and logsCollection
-const {client: mongoClient, dbName, usersCollection, logsCollection } = require('../config/mongo')
+const { client: mongoClient, dbName, usersCollection, exercisesCollection } = require('../config/mongo')
+const { NUM_HEX_CHAR_FOR_MONGO_ID } = require('../src/exercises')
 
 chai.use(chaiHttp).should()
 
@@ -34,13 +34,13 @@ describe('app', function() {
     })
 
     beforeEach(function(done) {
-        mongoClient.db(dbName).createCollection(logsCollection, function(err) {
+        mongoClient.db(dbName).createCollection(exercisesCollection, function(err) {
             if(err) {
-                console.log(`Couldn't create collection ${logsCollection}`)
+                console.log(`Couldn't create collection ${exercisesCollection}`)
                 throw new Error(err)
             }
 
-            console.log(`Created test collection ${logsCollection}`)
+            console.log(`Created test collection ${exercisesCollection}`)
             done()
         })
     })
@@ -58,13 +58,13 @@ describe('app', function() {
     })
 
     afterEach(function(done) {
-        mongoClient.db(dbName).dropCollection(logsCollection, function(err) {
+        mongoClient.db(dbName).dropCollection(exercisesCollection, function(err) {
             if(err) {
-                console.log(`Couldn't drop test collection ${logsCollection}`)
+                console.log(`Couldn't drop test collection ${exercisesCollection}`)
                 throw new Error(err)
             }
 
-            console.log(`Dropped test collection ${logsCollection}`)
+            console.log(`Dropped test collection ${exercisesCollection}`)
             done()
         })
     })
@@ -212,7 +212,7 @@ describe('app', function() {
 
                     chai.request(app)
                         .post('/api/exercise/add')
-                        .send({ userid, description, duration, date })
+                        .send({ userId, description, duration, date })
                         .end(function(err, res) {
                             if(err) {
                                 throw new Error(err)
@@ -229,7 +229,7 @@ describe('app', function() {
                             res.body._id.should.equal(userId)
                             res.body.username.should.equal(username)
                             res.body.description.should.equal(description)
-                            res.body.duration.should.equald(duration)
+                            res.body.duration.should.equal(duration)
                             res.body.date.should.equal(date)
         
                             done()
@@ -258,7 +258,7 @@ describe('app', function() {
 
                     chai.request(app)
                         .post('/api/exercise/add')
-                        .send({ userid, description, duration })
+                        .send({ userId, description, duration })
                         .end(function(err, res) {
                             if(err) {
                                 throw new Error(err)
@@ -275,7 +275,7 @@ describe('app', function() {
                             res.body._id.should.equal(userId)
                             res.body.username.should.equal(username)
                             res.body.description.should.equal(description)
-                            res.body.duration.should.equald(duration)
+                            res.body.duration.should.equal(duration)
                             res.body.date.should.equal(today)
         
                             done()
@@ -284,7 +284,7 @@ describe('app', function() {
 
         })
 
-        it('should send an error if userId, description, or duration are not specified', function(done) {
+        it('should send an error if userId is not specified', function(done) {
             chai.request(app)
                 .post('/api/exercise/add')
                 .send({ description: 'pectorals', duration : 60 })
@@ -297,7 +297,6 @@ describe('app', function() {
                     res.should.be.json
                     res.body.should.be.an('object')
                     res.body.should.have.property('error')
-                    res.body.error.should.equal("Field 'userId' was not provided")
                     done()
                 })
         })
@@ -315,7 +314,6 @@ describe('app', function() {
                     res.should.be.json
                     res.body.should.be.an('object')
                     res.body.should.have.property('error')
-                    res.body.error.should.equal("Field 'description' was not provided")
                     done()
                 })
         })
@@ -333,7 +331,6 @@ describe('app', function() {
                     res.should.be.json
                     res.body.should.be.an('object')
                     res.body.should.have.property('error')
-                    res.body.error.should.equal("Field 'duration' was not provided")
                     done()
                 })
         })
@@ -341,16 +338,20 @@ describe('app', function() {
         it('should send an error if the userId does not match any user ids', function(done) {
             chai.request(app)
                 .post('/api/exercise/new-user')
+                .send({ username: 'flo' })
                 .end(function(error, result) {
                     if(error) {
                         throw new Error(error)
                     }
 
                     const userId = result.body._id
+                    const userIdLastLetter = userId[NUM_HEX_CHAR_FOR_MONGO_ID - 1]
+                    const newLastLetter = userIdLastLetter === '1' ? '2' : '1'
+                    const nonExistentUserId = userId.slice(0, NUM_HEX_CHAR_FOR_MONGO_ID - 1) + newLastLetter
 
                     chai.request(app)
                         .post('/api/exercise/add')
-                        .send({ userId: `${userId}1`, description: 'pectorals', duration: 60 })
+                        .send({ userId: nonExistentUserId, description: 'pectorals', duration: 60 })
                         .end(function(err, res) {
                             if(err) {
                                 throw new Error(err)

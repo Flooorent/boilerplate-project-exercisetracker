@@ -5,6 +5,7 @@ const cors = require('cors')
 const httpStatus = require('http-status')
 
 const { createNewUser, getAllUsers, validateUsername } = require('./user')
+const { addExercise, validateExercise } = require('./exercises')
 
 app.use(cors())
 
@@ -30,7 +31,7 @@ I can retrieve part of the log of any user by also passing along optional parame
 
 app.get('/api/exercise/users', getAllUsers)
 app.post('/api/exercise/new-user', validateUsername, createNewUser)
-
+app.post('/api/exercise/add', validateExercise, addExercise)
 
 
 // Not found middleware
@@ -44,7 +45,7 @@ app.use((err, req, res, next) => {
 
   return res
     .status(err.statusCode || httpStatus.INTERNAL_SERVER_ERROR)
-    .json({ error: err.message })
+    .json({ error: err.message || err })
 })
 
 app.on('ready', () => {

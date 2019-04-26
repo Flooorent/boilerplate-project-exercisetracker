@@ -7,7 +7,7 @@ const dbName = {
 }
 
 const usersCollection = 'users'
-const logsCollection = 'logs'
+const exercisesCollection = 'exercises'
 
 const client = new MongoClient(url)
 
@@ -17,5 +17,5 @@ module.exports = {
     client,
     dbName: dbName[env],
     usersCollection,
-    logsCollection,
+    exercisesCollection,
 }
