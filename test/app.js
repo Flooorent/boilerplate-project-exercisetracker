@@ -426,17 +426,17 @@ describe('app', function() {
 
         beforeEach(function(done) {
             Promise.all([
-                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[0] }),
-                chai.request(app).post('/api/exercise/add').send({ userid: secondUserId, description: 'ex11', duration: 30, date: '2019-04-11' }),
-                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[1] }),
-                chai.request(app).post('/api/exercise/add').send({ userid: firstUserId, ...firstUserFullLog[2] }),
+                chai.request(app).post('/api/exercise/add').send({ userId: firstUserId, ...firstUserFullLog[0] }),
+                chai.request(app).post('/api/exercise/add').send({ userId: secondUserId, description: 'ex11', duration: 30, date: '2019-04-11' }),
+                chai.request(app).post('/api/exercise/add').send({ userId: firstUserId, ...firstUserFullLog[1] }),
+                chai.request(app).post('/api/exercise/add').send({ userId: firstUserId, ...firstUserFullLog[2] }),
             ])
             .then(() => done())
         })
 
-        it('should return the user object with the log and count', function(done) {
+        it('should return the user object with the log and count', function(done) {            
             chai.request(app)
-                .get(`/api/exercise/log?${firstUserId}`)
+                .get(`/api/exercise/log?userId=${firstUserId}`)
                 .end(function(err, res) {
                     if(err) {
                         throw new Error(err)
@@ -461,7 +461,7 @@ describe('app', function() {
 
         it('should handle from optional parameter', function(done) {
             chai.request(app)
-            .get(`/api/exercise/log?${firstUserId}&from=2019-04-12`) // don't retrieve the first exercise
+            .get(`/api/exercise/log?userId=${firstUserId}&from=2019-04-12`) // don't retrieve the first exercise
             .end(function(err, res) {
                 if(err) {
                     throw new Error(err)
@@ -486,7 +486,7 @@ describe('app', function() {
 
         it('should handle to optional parameter', function(done) {
             chai.request(app)
-            .get(`/api/exercise/log?${firstUserId}&to=2019-04-11`) // don't retrieve the last two exercises
+            .get(`/api/exercise/log?userId=${firstUserId}&to=2019-04-11`) // don't retrieve the last two exercises
             .end(function(err, res) {
                 if(err) {
                     throw new Error(err)
@@ -513,7 +513,7 @@ describe('app', function() {
             const limit = 2
 
             chai.request(app)
-            .get(`/api/exercise/log?${firstUserId}&limit=${limit}`)
+            .get(`/api/exercise/log?userId=${firstUserId}&limit=${limit}`)
             .end(function(err, res) {
                 if(err) {
                     throw new Error(err)
@@ -540,7 +540,7 @@ describe('app', function() {
             const limit = 5
 
             chai.request(app)
-            .get(`/api/exercise/log?${firstUserId}&limit=${limit}`)
+            .get(`/api/exercise/log?userId=${firstUserId}&limit=${limit}`)
             .end(function(err, res) {
                 if(err) {
                     throw new Error(err)
@@ -565,7 +565,7 @@ describe('app', function() {
 
         it('should handle all optional parameters at the same time', function(done) {
             chai.request(app)
-            .get(`/api/exercise/log?${firstUserId}&from=2019-04-11&to=2019-04-15&limit=1`)
+            .get(`/api/exercise/log?userId=${firstUserId}&from=2019-04-11&to=2019-04-15&limit=1`)
             .end(function(err, res) {
                 if(err) {
                     throw new Error(err)
